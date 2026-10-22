@@ -2,11 +2,11 @@
 
 A full-stack, local-first retail analytics platform built to operationalize the university project report **“Small Shop Sales Pattern Analysis Using Data Science.”**
 
-This application enables small shop owners and business analysts to transform raw manual daily sales transaction logs into verified data science insights, interactive time-series visualizations, product rankings, and automated findings.
+This application enables small shop owners, business analysts, and students to transform raw daily sales transaction records into verified data science insights, interactive time-series visualizations, product rankings, and automated findings.
 
 ---
 
-## Key Features
+## 1. Key Features
 
 - **Automated Data Cleaning & Quality Audit:** Detects missing entries, negative values, and duplicate records. Provides a row-level audit log and summary metrics.
 - **Calendar Day-of-Week Reconciliation:** Parses transaction dates and calculates genuine Gregorian weekdays using datetime libraries, catching and correcting human clerical errors (such as `01-02-2026` erroneously annotated as Monday instead of Sunday).
@@ -19,17 +19,17 @@ This application enables small shop owners and business analysts to transform ra
 
 ---
 
-## System Requirements
+## 2. System Requirements
 
 - **Operating System:** Windows 10 or Windows 11 (64-bit)
-- **Processor:** Intel Core i3 or equivalent (Core i5 recommended)
+- **Processor:** Intel Core i3 or higher (Core i5 recommended)
 - **RAM:** Minimum 4GB (8GB recommended)
-- **Storage:** Minimum 500MB free disk space
-- **Runtimes:** Python 3.11+, Node.js 18+ (or Bun 1.x)
+- **Disk Space:** Minimum 500MB free disk space
+- **Runtimes:** Python 3.11+, Node.js 18+ (or Bun 1.x), Git
 
 ---
 
-## Repository Structure
+## 3. Repository Structure
 
 ```text
 small-shop-sales-analysis/
@@ -74,75 +74,125 @@ small-shop-sales-analysis/
 
 ---
 
-## Quickstart Guide (Windows)
+## 4. Dataset Provenance & Labelling
 
-### 1. Start the Backend API
+The application ships with three built-in datasets in `data/samples/`, clearly distinguished by source:
 
-In a PowerShell terminal:
-
-```powershell
-# Navigate to project root
-cd "d:\PROJECT\small shop scale analysis"
-
-# Run FastAPI backend with Uvicorn
-py -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload
-```
-
-The backend API will start at `http://127.0.0.1:8000`. Interactive Swagger API documentation is available at `http://127.0.0.1:8000/docs`.
-
-### 2. Start the Frontend Dashboard
-
-In a second PowerShell terminal:
-
-```powershell
-cd "d:\PROJECT\small shop scale analysis\frontend"
-
-# Install dependencies (if not already installed)
-bun install  # or npm install
-
-# Start Vite dev server
-bun run dev -- --host 127.0.0.1 --port 5173
-```
-
-Open your web browser and navigate to:
-**`http://127.0.0.1:5173`**
+1. **`report_sample_transactions.csv` (Academic Reference Benchmark):**
+   - **Type:** Exact reproduction of the 4 transactions documented in Appendix C of the college project report.
+   - **Metrics:** Biscuits (₹200), Tea (₹75), Chips (₹375), Coffee (₹200). Total Revenue = **₹850.00**, Units = **70**.
+2. **`small_shop_15_days_realistic.csv` (Synthetic Demonstration Dataset):**
+   - **Type:** Deterministic synthetic dataset generated to satisfy Chapter 1.1 of the report ("sales data... over 10 to 15 days").
+   - **Metrics:** 189 transactions across 15 trading days (01-02-2026 to 15-02-2026) covering 14 grocery and household products. Total Sales = **₹104,165.00**.
+   - **Labeling:** Strictly labelled as synthetic demonstration data; not real proprietary records.
+3. **`small_shop_dirty_test.csv` (Quality Audit Benchmark):**
+   - **Type:** Synthetic test dataset with intentional flaws: missing category, negative quantities, negative prices, unparseable dates, and duplicate rows. Demonstrates audit and cleaning resilience.
+4. **External Kaggle Datasets (`data/kaggle/`):**
+   - The requested Kaggle URL (`https://www.kaggle.com/datasets/svizor/retail-sales-forecasting-data`) returned an HTTP 404 on Kaggle.
+   - Any external retail forecasting CSV can be placed in `data/kaggle/` and analyzed using the built-in column mapping layer.
 
 ---
 
-## Running the Automated Test Suite
+## 5. API Endpoints Reference
 
-### Backend Unit & Integration Tests (16 Tests)
+| Method | Endpoint | Description | Request Payload | Response |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/api/health` | Health check & system version | None | `{"status": "ok", "app": "...", "version": "1.0.0"}` |
+| `GET` | `/api/samples` | List available built-in datasets | None | Array of `SampleDatasetMeta` objects |
+| `GET` | `/api/samples/{id}/analyze` | Compute sales analytics on a sample | Query params (date filters, categories) | `SalesAnalyticsResponse` JSON |
+| `POST` | `/api/upload/preview` | Inspect and auto-map uploaded file | `file` (Multipart form-data: CSV or Excel) | Column list, row count, preview, suggested mapping |
+| `POST` | `/api/upload/analyze` | Clean, audit, and analyze user dataset | `file`, `mapping` JSON, optional filters | `SalesAnalyticsResponse` JSON |
+| `GET` | `/api/samples/{id}/export` | Export cleaned sample to CSV | None | CSV file attachment stream |
+| `GET` | `/docs` | Interactive Swagger API documentation | None | OpenAPI Swagger UI |
+
+---
+
+## 6. Windows Clean-Machine Setup & Execution Guide
+
+### Step 1: Clone or Navigate to the Workspace
 ```powershell
+cd "d:\PROJECT\small shop scale analysis"
+```
+
+### Step 2: Install Python Backend Dependencies
+Ensure Python 3.11+ is installed (`py --version`).
+```powershell
+py -m pip install -r backend/requirements.txt
+```
+*(Required packages: `fastapi`, `uvicorn`, `pydantic`, `pandas`, `openpyxl`, `python-multipart`, `pytest`, `httpx`)*
+
+### Step 3: Install Frontend Dependencies
+Ensure Node.js or Bun is installed (`node --version` or `bun --version`).
+```powershell
+cd frontend
+bun install
+# Or if using standard npm:
+# npm install
+cd ..
+```
+
+---
+
+## 7. Running the Application
+
+### Terminal 1: Launch Backend API Server
+```powershell
+cd "d:\PROJECT\small shop scale analysis"
+py -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload
+```
+*Backend runs on `http://127.0.0.1:8000`. API docs available at `http://127.0.0.1:8000/docs`.*
+
+### Terminal 2: Launch Frontend Web Dashboard
+```powershell
+cd "d:\PROJECT\small shop scale analysis\frontend"
+bun run dev -- --host 127.0.0.1 --port 5173
+# Or if using npm:
+# npm run dev -- --host 127.0.0.1 --port 5173
+```
+*Frontend runs on `http://127.0.0.1:5173`.*
+
+---
+
+## 8. Running Automated Tests & Verification
+
+### Run Backend Unit & Integration Tests (16 Tests)
+```powershell
+cd "d:\PROJECT\small shop scale analysis"
 py -m pytest backend/tests/ -v
 ```
 
-### Frontend Production Build Verification
+### Run Frontend Production Build & TypeScript Check
 ```powershell
-cd frontend
-bun run build  # or npm run build
+cd "d:\PROJECT\small shop scale analysis\frontend"
+bun run --bun tsc --noEmit
+bun run build
+cd ..
 ```
 
-### End-to-End Browser Verification (Playwright)
-Ensure both backend and frontend are running, then run:
+### Run Playwright Browser End-to-End Verification
+Make sure both servers are running, then execute:
 ```powershell
+cd "d:\PROJECT\small shop scale analysis"
 py scripts/verify_e2e.py
 ```
-This automated script tests dashboard rendering, verifies calculations against report figures, exercises the data quality audit modal, switches datasets, and saves screenshot proofs into `docs/screenshots/`.
+This automated browser test executes live assertions against the interface and updates the screenshot proofs in `docs/screenshots/`.
 
 ---
 
-## Kaggle External Dataset Instructions
+## 9. Troubleshooting Guide
 
-If you wish to test with an external Kaggle retail dataset:
-1. Refer to `docs/dataset-source-and-license.md` for background and schema comparison.
-2. Download your retail CSV file (e.g. `sales.csv`).
-3. In the application interface, click **Upload Data**.
-4. In the Column Mapping dialog, assign the Date, Product, and Sales columns.
-5. If the external dataset already includes line totals (e.g., `weekly_sales`), map it to **"Pre-Calculated Total Sales Column"** to prevent double multiplication.
+| Issue | Root Cause | Solution |
+| :--- | :--- | :--- |
+| **Port 8000 already in use** | Another Uvicorn process is listening on port 8000. | Check processes with `Get-NetTCPConnection -LocalPort 8000` and stop the conflicting PID, or run on an alternate port with `--port 8001`. |
+| **Port 5173 already in use** | Another Vite dev server is running. | Vite will automatically suggest port 5174, or specify `--port 5174`. Update `frontend/vite.config.ts` proxy if needed. |
+| **Excel (.xlsx) upload fails** | Missing `openpyxl` dependency. | Run `py -m pip install openpyxl`. |
+| **Playwright Chromium error** | Chromium browser binaries not installed for Playwright. | Run `py -m playwright install chromium`. |
+| **CORS errors in browser console** | Accessing from an unwhitelisted port. | Check `.env.example` / `backend/app/core/config.py`. Port 5173 and 3000 are whitelisted by default. |
+| **File encoding error during upload** | Legacy CSV saved in ANSI / Windows-1252. | The backend automatically falls back to `latin-1` if UTF-8 decoding fails. If problem persists, re-save CSV as UTF-8 in Excel. |
 
 ---
 
-## License & Attribution
+## 10. License & Attribution
 
-- Built as an engineering expansion of the student academic report **“Small Shop Sales Pattern Analysis Using Data Science.”**
-- Licensed under the MIT License for educational and small business analytics use.
+- Built as an engineering expansion of the academic project report **“Small Shop Sales Pattern Analysis Using Data Science.”**
+- Released for educational, demonstration, and small business analytics use under the MIT License.

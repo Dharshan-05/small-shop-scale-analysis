@@ -1,0 +1,190 @@
+Date,Day,Product_Category,Product_Name,Quantity_Sold,Price
+01-02-2026,Sunday,Snacks,Biscuits,47,10
+01-02-2026,Sunday,Snacks,Chips,58,15
+01-02-2026,Sunday,Snacks,Noodles,22,14
+01-02-2026,Sunday,Beverages,Tea,41,5
+01-02-2026,Sunday,Beverages,Coffee,16,20
+01-02-2026,Sunday,Grocery,Milk,26,30
+01-02-2026,Sunday,Grocery,Rice (1kg),11,60
+01-02-2026,Sunday,Grocery,Sugar (1kg),19,45
+01-02-2026,Sunday,Grocery,Cooking Oil (1L),6,140
+01-02-2026,Sunday,Personal Care,Soap,10,28
+01-02-2026,Sunday,Personal Care,Shampoo Sachet,30,3
+01-02-2026,Sunday,Household,Detergent Powder,6,55
+02-02-2026,Monday,Snacks,Biscuits,25,10
+02-02-2026,Monday,Snacks,Chips,26,15
+02-02-2026,Monday,Snacks,Noodles,20,14
+02-02-2026,Monday,Beverages,Tea,49,5
+02-02-2026,Monday,Beverages,Coffee,21,20
+02-02-2026,Monday,Beverages,Soft Drink,9,35
+02-02-2026,Monday,Grocery,Milk,37,30
+02-02-2026,Monday,Grocery,Rice (1kg),14,60
+02-02-2026,Monday,Grocery,Sugar (1kg),17,45
+02-02-2026,Monday,Grocery,Cooking Oil (1L),8,140
+02-02-2026,Monday,Personal Care,Shampoo Sachet,72,3
+02-02-2026,Monday,Household,Detergent Powder,8,55
+03-02-2026,Tuesday,Snacks,Biscuits,22,10
+03-02-2026,Tuesday,Snacks,Chips,32,15
+03-02-2026,Tuesday,Snacks,Noodles,30,14
+03-02-2026,Tuesday,Beverages,Tea,35,5
+03-02-2026,Tuesday,Beverages,Coffee,16,20
+03-02-2026,Tuesday,Beverages,Soft Drink,30,35
+03-02-2026,Tuesday,Grocery,Bread,30,25
+03-02-2026,Tuesday,Grocery,Rice (1kg),12,60
+03-02-2026,Tuesday,Grocery,Sugar (1kg),14,45
+03-02-2026,Tuesday,Grocery,Cooking Oil (1L),11,140
+03-02-2026,Tuesday,Personal Care,Soap,11,28
+03-02-2026,Tuesday,Household,Detergent Powder,4,55
+04-02-2026,Wednesday,Snacks,Biscuits,27,10
+04-02-2026,Wednesday,Snacks,Chips,26,15
+04-02-2026,Wednesday,Snacks,Noodles,28,14
+04-02-2026,Wednesday,Beverages,Tea,45,5
+04-02-2026,Wednesday,Beverages,Coffee,25,20
+04-02-2026,Wednesday,Beverages,Soft Drink,28,35
+04-02-2026,Wednesday,Grocery,Milk,28,30
+04-02-2026,Wednesday,Grocery,Bread,33,25
+04-02-2026,Wednesday,Grocery,Rice (1kg),13,60
+04-02-2026,Wednesday,Grocery,Sugar (1kg),14,45
+04-02-2026,Wednesday,Grocery,Cooking Oil (1L),9,140
+04-02-2026,Wednesday,Personal Care,Soap,8,28
+04-02-2026,Wednesday,Personal Care,Shampoo Sachet,35,3
+04-02-2026,Wednesday,Household,Detergent Powder,5,55
+05-02-2026,Thursday,Snacks,Biscuits,20,10
+05-02-2026,Thursday,Snacks,Chips,33,15
+05-02-2026,Thursday,Snacks,Noodles,22,14
+05-02-2026,Thursday,Beverages,Tea,54,5
+05-02-2026,Thursday,Beverages,Coffee,10,20
+05-02-2026,Thursday,Beverages,Soft Drink,11,35
+05-02-2026,Thursday,Grocery,Milk,37,30
+05-02-2026,Thursday,Grocery,Bread,34,25
+05-02-2026,Thursday,Grocery,Rice (1kg),8,60
+05-02-2026,Thursday,Grocery,Sugar (1kg),10,45
+05-02-2026,Thursday,Grocery,Cooking Oil (1L),7,140
+05-02-2026,Thursday,Personal Care,Soap,18,28
+05-02-2026,Thursday,Personal Care,Shampoo Sachet,36,3
+05-02-2026,Thursday,Household,Detergent Powder,8,55
+06-02-2026,Friday,Snacks,Biscuits,31,10
+06-02-2026,Friday,Snacks,Chips,24,15
+06-02-2026,Friday,Snacks,Noodles,15,14
+06-02-2026,Friday,Beverages,Tea,58,5
+06-02-2026,Friday,Beverages,Coffee,20,20
+06-02-2026,Friday,Beverages,Soft Drink,11,35
+06-02-2026,Friday,Grocery,Milk,48,30
+06-02-2026,Friday,Grocery,Bread,35,25
+06-02-2026,Friday,Grocery,Rice (1kg),6,60
+06-02-2026,Friday,Grocery,Sugar (1kg),17,45
+06-02-2026,Friday,Grocery,Cooking Oil (1L),4,140
+06-02-2026,Friday,Personal Care,Shampoo Sachet,78,3
+06-02-2026,Friday,Household,Detergent Powder,6,55
+07-02-2026,Saturday,Snacks,Biscuits,40,10
+07-02-2026,Saturday,Snacks,Chips,33,15
+07-02-2026,Saturday,Snacks,Noodles,39,14
+07-02-2026,Saturday,Beverages,Tea,51,5
+07-02-2026,Saturday,Beverages,Coffee,21,20
+07-02-2026,Saturday,Beverages,Soft Drink,27,35
+07-02-2026,Saturday,Grocery,Milk,40,30
+07-02-2026,Saturday,Grocery,Bread,26,25
+07-02-2026,Saturday,Grocery,Rice (1kg),12,60
+07-02-2026,Saturday,Grocery,Cooking Oil (1L),11,140
+07-02-2026,Saturday,Personal Care,Shampoo Sachet,75,3
+08-02-2026,Sunday,Snacks,Biscuits,21,10
+08-02-2026,Sunday,Snacks,Chips,29,15
+08-02-2026,Sunday,Snacks,Noodles,24,14
+08-02-2026,Sunday,Beverages,Tea,51,5
+08-02-2026,Sunday,Beverages,Coffee,33,20
+08-02-2026,Sunday,Beverages,Soft Drink,31,35
+08-02-2026,Sunday,Grocery,Milk,26,30
+08-02-2026,Sunday,Grocery,Bread,31,25
+08-02-2026,Sunday,Grocery,Rice (1kg),18,60
+08-02-2026,Sunday,Grocery,Sugar (1kg),21,45
+08-02-2026,Sunday,Personal Care,Soap,17,28
+08-02-2026,Sunday,Personal Care,Shampoo Sachet,36,3
+08-02-2026,Sunday,Household,Detergent Powder,7,55
+09-02-2026,Monday,Snacks,Biscuits,19,10
+09-02-2026,Monday,Snacks,Chips,28,15
+09-02-2026,Monday,Snacks,Noodles,12,14
+09-02-2026,Monday,Beverages,Tea,60,5
+09-02-2026,Monday,Beverages,Coffee,10,20
+09-02-2026,Monday,Beverages,Soft Drink,15,35
+09-02-2026,Monday,Grocery,Milk,35,30
+09-02-2026,Monday,Grocery,Bread,22,25
+09-02-2026,Monday,Grocery,Rice (1kg),10,60
+09-02-2026,Monday,Grocery,Sugar (1kg),14,45
+09-02-2026,Monday,Grocery,Cooking Oil (1L),10,140
+09-02-2026,Monday,Personal Care,Soap,17,28
+09-02-2026,Monday,Personal Care,Shampoo Sachet,80,3
+09-02-2026,Monday,Household,Detergent Powder,15,55
+10-02-2026,Tuesday,Snacks,Biscuits,21,10
+10-02-2026,Tuesday,Beverages,Coffee,25,20
+10-02-2026,Tuesday,Beverages,Soft Drink,24,35
+10-02-2026,Tuesday,Grocery,Milk,50,30
+10-02-2026,Tuesday,Grocery,Rice (1kg),7,60
+10-02-2026,Tuesday,Grocery,Sugar (1kg),11,45
+10-02-2026,Tuesday,Grocery,Cooking Oil (1L),12,140
+10-02-2026,Tuesday,Personal Care,Shampoo Sachet,35,3
+10-02-2026,Tuesday,Household,Detergent Powder,13,55
+11-02-2026,Wednesday,Snacks,Biscuits,25,10
+11-02-2026,Wednesday,Snacks,Chips,26,15
+11-02-2026,Wednesday,Snacks,Noodles,20,14
+11-02-2026,Wednesday,Beverages,Tea,50,5
+11-02-2026,Wednesday,Beverages,Coffee,19,20
+11-02-2026,Wednesday,Grocery,Milk,39,30
+11-02-2026,Wednesday,Grocery,Rice (1kg),11,60
+11-02-2026,Wednesday,Grocery,Sugar (1kg),10,45
+11-02-2026,Wednesday,Grocery,Cooking Oil (1L),4,140
+11-02-2026,Wednesday,Personal Care,Soap,11,28
+11-02-2026,Wednesday,Personal Care,Shampoo Sachet,58,3
+11-02-2026,Wednesday,Household,Detergent Powder,15,55
+12-02-2026,Thursday,Snacks,Biscuits,40,10
+12-02-2026,Thursday,Snacks,Chips,20,15
+12-02-2026,Thursday,Snacks,Noodles,27,14
+12-02-2026,Thursday,Beverages,Tea,31,5
+12-02-2026,Thursday,Beverages,Coffee,14,20
+12-02-2026,Thursday,Beverages,Soft Drink,11,35
+12-02-2026,Thursday,Grocery,Milk,24,30
+12-02-2026,Thursday,Grocery,Bread,29,25
+12-02-2026,Thursday,Grocery,Rice (1kg),15,60
+12-02-2026,Thursday,Grocery,Sugar (1kg),18,45
+12-02-2026,Thursday,Grocery,Cooking Oil (1L),11,140
+12-02-2026,Thursday,Personal Care,Soap,20,28
+12-02-2026,Thursday,Personal Care,Shampoo Sachet,33,3
+12-02-2026,Thursday,Household,Detergent Powder,10,55
+13-02-2026,Friday,Snacks,Chips,44,15
+13-02-2026,Friday,Snacks,Noodles,18,14
+13-02-2026,Friday,Beverages,Tea,53,5
+13-02-2026,Friday,Beverages,Coffee,23,20
+13-02-2026,Friday,Grocery,Milk,48,30
+13-02-2026,Friday,Grocery,Bread,14,25
+13-02-2026,Friday,Grocery,Rice (1kg),16,60
+13-02-2026,Friday,Grocery,Sugar (1kg),10,45
+13-02-2026,Friday,Grocery,Cooking Oil (1L),3,140
+13-02-2026,Friday,Personal Care,Soap,20,28
+13-02-2026,Friday,Personal Care,Shampoo Sachet,32,3
+13-02-2026,Friday,Household,Detergent Powder,7,55
+14-02-2026,Saturday,Snacks,Biscuits,48,10
+14-02-2026,Saturday,Snacks,Chips,59,15
+14-02-2026,Saturday,Snacks,Noodles,31,14
+14-02-2026,Saturday,Beverages,Tea,45,5
+14-02-2026,Saturday,Beverages,Coffee,22,20
+14-02-2026,Saturday,Beverages,Soft Drink,17,35
+14-02-2026,Saturday,Grocery,Milk,20,30
+14-02-2026,Saturday,Grocery,Bread,20,25
+14-02-2026,Saturday,Grocery,Rice (1kg),18,60
+14-02-2026,Saturday,Grocery,Sugar (1kg),21,45
+14-02-2026,Saturday,Grocery,Cooking Oil (1L),6,140
+14-02-2026,Saturday,Personal Care,Soap,18,28
+14-02-2026,Saturday,Personal Care,Shampoo Sachet,54,3
+14-02-2026,Saturday,Household,Detergent Powder,11,55
+15-02-2026,Sunday,Snacks,Biscuits,39,10
+15-02-2026,Sunday,Snacks,Chips,62,15
+15-02-2026,Sunday,Snacks,Noodles,22,14
+15-02-2026,Sunday,Beverages,Tea,49,5
+15-02-2026,Sunday,Beverages,Coffee,24,20
+15-02-2026,Sunday,Beverages,Soft Drink,21,35
+15-02-2026,Sunday,Grocery,Milk,36,30
+15-02-2026,Sunday,Grocery,Bread,27,25
+15-02-2026,Sunday,Grocery,Rice (1kg),5,60
+15-02-2026,Sunday,Grocery,Sugar (1kg),12,45
+15-02-2026,Sunday,Personal Care,Soap,15,28
+15-02-2026,Sunday,Personal Care,Shampoo Sachet,76,3
+15-02-2026,Sunday,Household,Detergent Powder,10,55

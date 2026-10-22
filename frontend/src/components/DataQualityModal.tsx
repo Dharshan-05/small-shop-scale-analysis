@@ -40,7 +40,7 @@ export const DataQualityModal: React.FC<DataQualityModalProps> = ({ isOpen, onCl
         {/* Content */}
         <div className="p-5 overflow-y-auto space-y-5 text-xs text-slate-700">
           {/* Summary Stat Badges */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
             <div className="bg-slate-50 border border-slate-200 rounded-xl p-3">
               <div className="text-[11px] font-medium text-slate-500">Raw Input Rows</div>
               <div className="text-lg font-bold text-slate-900 font-mono mt-0.5">
@@ -57,6 +57,17 @@ export const DataQualityModal: React.FC<DataQualityModalProps> = ({ isOpen, onCl
               <div className="text-[11px] font-medium text-amber-700">Date/Day Corrections</div>
               <div className="text-lg font-bold text-amber-800 font-mono mt-0.5">
                 {report.date_corrections_count}
+              </div>
+            </div>
+            <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-3">
+              <div className="text-[11px] font-medium text-indigo-700">Duplicates Handled</div>
+              <div className="text-lg font-bold text-indigo-800 font-mono mt-0.5">
+                {report.duplicate_rows_detected}
+              </div>
+              <div className="text-[10px] text-indigo-600 mt-0.5">
+                {report.duplicate_rows_removed > 0
+                  ? `${report.duplicate_rows_removed} removed`
+                  : 'preserved'}
               </div>
             </div>
             <div className="bg-rose-50 border border-rose-200 rounded-xl p-3">
@@ -125,7 +136,7 @@ export const DataQualityModal: React.FC<DataQualityModalProps> = ({ isOpen, onCl
           {/* Methodology Card */}
           <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-slate-600 text-[11px] leading-relaxed">
             <strong className="text-slate-800 block mb-1">Audit Protocol Reference:</strong>
-            Sales formula: <code>Total = Quantity × Unit Price</code> (or preserved if pre-calculated). Day-of-week verification computes the genuine Gregorian calendar day to correct manual student entry errors (such as 01-02-2026 being a Sunday rather than Monday).
+            Sales formula: <code>Total = Quantity × Unit Price</code> (or preserved if pre-calculated). Day-of-week verification computes the genuine Gregorian calendar day to correct manual student entry errors (such as 01-02-2026 being a Sunday rather than Monday). Duplicate Policy: <code>{report.duplicate_policy || 'remove_exact'}</code> (exact duplicate rows are {report.duplicate_policy === 'keep_all' ? 'preserved for multi-item records' : 'removed to protect against double-counting'}).
           </div>
         </div>
 

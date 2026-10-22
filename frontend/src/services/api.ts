@@ -93,3 +93,59 @@ export async function uploadAndAnalyze(
   }
   return res.json();
 }
+
+export async function exportSampleFullCSV(
+  sampleId: string,
+  params?: {
+    startDate?: string;
+    endDate?: string;
+    categories?: string[];
+    products?: string[];
+  }
+): Promise<Blob> {
+  const query = new URLSearchParams();
+  if (params?.startDate) query.set('start_date', params.startDate);
+  if (params?.endDate) query.set('end_date', params.endDate);
+  if (params?.categories) {
+    params.categories.forEach((c) => query.append('categories', c));
+  }
+  if (params?.products) {
+    params.products.forEach((p) => query.append('products', p));
+  }
+
+  const qs = query.toString();
+  const res = await fetch(`${API_BASE}/samples/${sampleId}/export${qs ? `?${qs}` : ''}`);
+  if (!res.ok) {
+    throw new Error('Failed to export full dataset CSV');
+  }
+  return res.blob();
+}
+
+export async function exportUploadFullCSV(
+  file: File,
+  mapping: ColumnMappingConfig,
+  params?: {
+    startDate?: string;
+    endDate?: string;
+    categories?: string[];
+    products?: string[];
+  }
+): Promise<Blob> {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('mapping', JSON.stringify(mapping));
+  if (params?.startDate) formData.append('start_date', params.startDate);
+  if (params?.endDate) formData.append('end_date', params.endDate);
+  if (params?.categories) formData.append('categories', JSON.stringify(params.categories));
+  if (params?.products) formData.append('products', JSON.stringify(params.products));
+
+  const res = await fetch(`${API_BASE}/upload/export`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!res.ok) {
+    throw new Error('Failed to export uploaded dataset CSV');
+  }
+  return res.blob();
+}

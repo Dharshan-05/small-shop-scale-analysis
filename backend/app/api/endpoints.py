@@ -3,7 +3,7 @@ import io
 import json
 import pandas as pd
 from typing import List, Optional
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Query, Response
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Query
 from fastapi.responses import StreamingResponse
 
 from backend.app.schemas.sales import (
@@ -47,14 +47,31 @@ SAMPLE_CONFIGS = {
     }
 }
 
+async def read_upload_with_limit(file: UploadFile, max_bytes: int) -> bytes:
+    chunks = []
+    total_bytes = 0
+    chunk_size = 1024 * 1024
+    while True:
+        chunk = await file.read(chunk_size)
+        if not chunk:
+            break
+        total_bytes += len(chunk)
+        if total_bytes > max_bytes:
+            raise HTTPException(
+                status_code=413,
+                detail=f"File exceeds maximum allowed size of {max_bytes // (1024 * 1024)}MB."
+            )
+        chunks.append(chunk)
+    return b"".join(chunks)
+
 def load_file_to_df(filename: str, content_bytes: bytes) -> pd.DataFrame:
-    ext = os.path.splitext(filename)[1].lower()
+    ext = os.path.splitext(filename or "")[1].lower()
     if ext in [".xlsx", ".xls"]:
         try:
             return pd.read_excel(io.BytesIO(content_bytes))
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Failed to parse Excel file: {str(e)}")
-    elif ext in [".csv", ".txt"]:
+    elif ext in [".csv", ".txt", ".tsv", ""]:
         try:
             return pd.read_csv(io.BytesIO(content_bytes), encoding="utf-8")
         except UnicodeDecodeError:
@@ -76,16 +93,13 @@ def process_and_build_response(
 ) -> SalesAnalyticsResponse:
     clean_df, quality_report = preprocessor.clean(df, mapping)
     
-    # Store min/max dates from cleaned df
     min_date = str(clean_df["date"].min()) if not clean_df.empty else None
     max_date = str(clean_df["date"].max()) if not clean_df.empty else None
     available_cats = sorted(clean_df["product_category"].dropna().unique().tolist()) if not clean_df.empty else []
     available_prods = sorted(clean_df["product_name"].dropna().unique().tolist()) if not clean_df.empty else []
 
-    # Apply interactive filters if requested
     filtered_df = analytics_engine.apply_filters(clean_df, filters)
 
-    # Compute analytics
     kpis = analytics_engine.calculate_kpis(filtered_df)
     prod_perf = analytics_engine.get_product_performance(filtered_df)
     cat_perf = analytics_engine.get_category_performance(filtered_df)
@@ -106,6 +120,7 @@ def process_and_build_response(
         day_of_week_performance=dow_perf,
         insights=insights,
         records_preview=preview_records,
+        total_cleaned_records=len(filtered_df),
         available_categories=available_cats,
         available_products=available_prods,
         min_date=min_date,
@@ -154,9 +169,8 @@ def analyze_sample(
 
 @router.post("/upload/preview")
 async def upload_preview(file: UploadFile = File(...)):
-    contents = await file.read()
-    if len(contents) > settings.MAX_UPLOAD_SIZE_MB * 1024 * 1024:
-        raise HTTPException(status_code=400, detail="File size exceeds limit.")
+    max_bytes = settings.MAX_UPLOAD_SIZE_MB * 1024 * 1024
+    contents = await read_upload_with_limit(file, max_bytes)
     
     df = load_file_to_df(file.filename, contents)
     mapping = preprocessor.auto_detect_mapping(df)
@@ -176,12 +190,11 @@ async def upload_and_analyze(
     mapping: Optional[str] = Form(None),
     start_date: Optional[str] = Form(None),
     end_date: Optional[str] = Form(None),
-    categories: Optional[str] = Form(None), # JSON list
-    products: Optional[str] = Form(None)     # JSON list
+    categories: Optional[str] = Form(None),
+    products: Optional[str] = Form(None)
 ):
-    contents = await file.read()
-    if len(contents) > settings.MAX_UPLOAD_SIZE_MB * 1024 * 1024:
-        raise HTTPException(status_code=400, detail="File size exceeds limit.")
+    max_bytes = settings.MAX_UPLOAD_SIZE_MB * 1024 * 1024
+    contents = await read_upload_with_limit(file, max_bytes)
     
     df = load_file_to_df(file.filename, contents)
     
@@ -214,18 +227,80 @@ async def upload_and_analyze(
     )
 
 @router.get("/samples/{sample_id}/export")
-def export_sample_clean_csv(sample_id: str):
+def export_sample_clean_csv(
+    sample_id: str,
+    start_date: Optional[str] = Query(None),
+    end_date: Optional[str] = Query(None),
+    categories: Optional[List[str]] = Query(None),
+    products: Optional[List[str]] = Query(None)
+):
     if sample_id not in SAMPLE_CONFIGS:
-        raise HTTPException(status_code=404, detail="Sample not found")
+        raise HTTPException(status_code=404, detail=f"Sample '{sample_id}' not found.")
     cfg = SAMPLE_CONFIGS[sample_id]
     file_path = os.path.join(SAMPLES_DIR, cfg["filename"])
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail=f"Sample file not found.")
+        
     raw_df = pd.read_csv(file_path)
     clean_df, _ = preprocessor.clean(raw_df)
     
+    filters = AnalyticsFilterParams(
+        start_date=start_date,
+        end_date=end_date,
+        categories=categories,
+        products=products
+    )
+    filtered_df = analytics_engine.apply_filters(clean_df, filters)
+    
     stream = io.StringIO()
-    clean_df.to_csv(stream, index=False)
+    filtered_df.to_csv(stream, index=False)
     stream.seek(0)
     
     response = StreamingResponse(iter([stream.getvalue()]), media_type="text/csv")
-    response.headers["Content-Disposition"] = f"attachment; filename=cleaned_{sample_id}.csv"
+    response.headers["Content-Disposition"] = f"attachment; filename=cleaned_{sample_id}_full_export.csv"
+    return response
+
+@router.post("/upload/export")
+async def export_upload_clean_csv(
+    file: UploadFile = File(...),
+    mapping: Optional[str] = Form(None),
+    start_date: Optional[str] = Form(None),
+    end_date: Optional[str] = Form(None),
+    categories: Optional[str] = Form(None),
+    products: Optional[str] = Form(None)
+):
+    max_bytes = settings.MAX_UPLOAD_SIZE_MB * 1024 * 1024
+    contents = await read_upload_with_limit(file, max_bytes)
+    df = load_file_to_df(file.filename, contents)
+    
+    mapping_obj = None
+    if mapping:
+        try:
+            m_dict = json.loads(mapping)
+            mapping_obj = ColumnMappingConfig(**m_dict)
+        except Exception:
+            mapping_obj = preprocessor.auto_detect_mapping(df)
+    else:
+        mapping_obj = preprocessor.auto_detect_mapping(df)
+
+    cat_list = json.loads(categories) if categories else None
+    prod_list = json.loads(products) if products else None
+
+    filters = AnalyticsFilterParams(
+        start_date=start_date,
+        end_date=end_date,
+        categories=cat_list,
+        products=prod_list
+    )
+
+    clean_df, _ = preprocessor.clean(df, mapping_obj)
+    filtered_df = analytics_engine.apply_filters(clean_df, filters)
+
+    stream = io.StringIO()
+    filtered_df.to_csv(stream, index=False)
+    stream.seek(0)
+
+    safe_name = os.path.splitext(file.filename or "upload")[0]
+    response = StreamingResponse(iter([stream.getvalue()]), media_type="text/csv")
+    response.headers["Content-Disposition"] = f"attachment; filename=cleaned_{safe_name}_full_export.csv"
     return response

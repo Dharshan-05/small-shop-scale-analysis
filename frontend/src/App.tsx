@@ -13,14 +13,16 @@ import { UploadModal } from './components/UploadModal';
 import {
   fetchSamples,
   fetchSampleAnalysis,
-  uploadAndAnalyze
+  uploadAndAnalyze,
+  exportSampleFullCSV,
+  exportUploadFullCSV
 } from './services/api';
 import {
   SalesAnalyticsResponse,
   SampleDatasetMeta,
   ColumnMappingConfig
 } from './types/api';
-import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
 
 export const App: React.FC = () => {
   const [samples, setSamples] = useState<SampleDatasetMeta[]>([]);
@@ -165,24 +167,39 @@ export const App: React.FC = () => {
     }
   };
 
-  const handleExportCSV = () => {
-    if (!data || !data.records_preview || data.records_preview.length === 0) return;
+  const handleExportCSV = async () => {
+    if (!data) return;
 
-    const headers = Object.keys(data.records_preview[0]);
-    const csvRows = [
-      headers.join(','),
-      ...data.records_preview.map((row) =>
-        headers.map((h) => JSON.stringify(row[h] ?? '')).join(',')
-      ),
-    ];
-    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `sales_cleaned_${data.dataset_source}_export.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      const filterPayload = {
+        startDate: startDate || undefined,
+        endDate: endDate || undefined,
+        categories: selectedCategories.length > 0 ? selectedCategories : undefined,
+        products: searchTerm ? [searchTerm] : undefined,
+      };
+
+      let blob: Blob;
+      let filename: string;
+
+      if (uploadedFile) {
+        blob = await exportUploadFullCSV(uploadedFile.file, uploadedFile.mapping, filterPayload);
+        filename = `cleaned_uploaded_full_export.csv`;
+      } else {
+        blob = await exportSampleFullCSV(selectedSampleId, filterPayload);
+        filename = `cleaned_${selectedSampleId}_full_export.csv`;
+      }
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      setError(`Export failed: ${err.message || 'Unable to download complete CSV'}`);
+    }
   };
 
   return (
@@ -247,7 +264,7 @@ export const App: React.FC = () => {
               onResetFilters={handleResetFilters}
               minDate={data.min_date}
               maxDate={data.max_date}
-              filteredCount={data.records_preview.length}
+              filteredCount={data.kpis.total_records}
             />
 
             {/* Charts Grid */}
@@ -259,7 +276,11 @@ export const App: React.FC = () => {
             </div>
 
             {/* Cleaned Records Interactive Table */}
-            <DataTable records={data.records_preview} onExport={handleExportCSV} />
+            <DataTable
+              records={data.records_preview}
+              totalRecords={data.total_cleaned_records}
+              onExport={handleExportCSV}
+            />
           </>
         )}
       </main>

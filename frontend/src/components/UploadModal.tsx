@@ -262,6 +262,31 @@ export const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onAna
                     ))}
                   </select>
                 </div>
+
+                {/* Duplicate Policy */}
+                <div className="sm:col-span-2">
+                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                    Duplicate Row Policy
+                  </label>
+                  <select
+                    aria-label="Duplicate Policy"
+                    className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-sky-500"
+                    value={mapping.duplicate_policy || 'remove_exact'}
+                    onChange={(e) =>
+                      setMapping({
+                        ...mapping,
+                        duplicate_policy: e.target.value as 'remove_exact' | 'keep_all',
+                      })
+                    }
+                  >
+                    <option value="remove_exact">
+                      Remove Exact Duplicates (Recommended - prevents double-counting entry errors)
+                    </option>
+                    <option value="keep_all">
+                      Keep All Rows (Preserves identical repeat transactions on same date)
+                    </option>
+                  </select>
+                </div>
               </div>
             </div>
           )}

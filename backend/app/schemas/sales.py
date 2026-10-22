@@ -9,6 +9,7 @@ class ColumnMappingConfig(BaseModel):
     quantity_col: Optional[str] = Field(default="Quantity_Sold", description="Column for quantity sold")
     price_col: Optional[str] = Field(default="Price", description="Column for unit price")
     total_sales_col: Optional[str] = Field(default="Total_Sales", description="Column for pre-calculated total sales")
+    duplicate_policy: str = Field(default="remove_exact", description="Policy for duplicate rows: 'remove_exact' or 'keep_all'")
 
 class DataQualityIssue(BaseModel):
     row_index: int
@@ -24,6 +25,8 @@ class DataQualityReport(BaseModel):
     accepted_rows: int = 0
     rejected_rows: int = 0
     duplicate_rows_detected: int = 0
+    duplicate_rows_removed: int = 0
+    duplicate_policy: str = "remove_exact"
     missing_values_count: Dict[str, int] = Field(default_factory=dict)
     date_corrections_count: int = 0
     issues: List[DataQualityIssue] = Field(default_factory=list)
@@ -112,6 +115,7 @@ class SalesAnalyticsResponse(BaseModel):
     day_of_week_performance: List[DayOfWeekPerformance]
     insights: List[InsightItem]
     records_preview: List[Dict[str, Any]]
+    total_cleaned_records: int = 0
     available_categories: List[str]
     available_products: List[str]
     min_date: Optional[str] = None

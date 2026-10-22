@@ -6,6 +6,7 @@ export interface ColumnMappingConfig {
   quantity_col?: string | null;
   price_col?: string | null;
   total_sales_col?: string | null;
+  duplicate_policy?: 'remove_exact' | 'keep_all';
 }
 
 export interface DataQualityIssue {
@@ -23,6 +24,8 @@ export interface DataQualityReport {
   accepted_rows: number;
   rejected_rows: number;
   duplicate_rows_detected: number;
+  duplicate_rows_removed: number;
+  duplicate_policy: string;
   missing_values_count: Record<string, number>;
   date_corrections_count: number;
   issues: DataQualityIssue[];
@@ -104,6 +107,7 @@ export interface SalesAnalyticsResponse {
   day_of_week_performance: DayOfWeekPerformance[];
   insights: InsightItem[];
   records_preview: Record<string, any>[];
+  total_cleaned_records: number;
   available_categories: string[];
   available_products: string[];
   min_date?: string | null;

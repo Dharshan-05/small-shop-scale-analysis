@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { ArrowUpDown, Download, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowUpDown, Download, ChevronLeft, ChevronRight, Info } from 'lucide-react';
 
 interface DataTableProps {
   records: Record<string, any>[];
+  totalRecords: number;
   onExport: () => void;
 }
 
-export const DataTable: React.FC<DataTableProps> = ({ records, onExport }) => {
+export const DataTable: React.FC<DataTableProps> = ({ records, totalRecords, onExport }) => {
   const [sortCol, setSortCol] = useState<string>('date');
   const [sortAsc, setSortAsc] = useState<boolean>(true);
   const [page, setPage] = useState<number>(1);
@@ -50,18 +51,28 @@ export const DataTable: React.FC<DataTableProps> = ({ records, onExport }) => {
             Cleaned Sales Transaction Records
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
-            Verified line-item transactions ready for audit & export ({records.length} records)
+            Verified line-item transactions ready for audit & export ({totalRecords} total matching records)
           </p>
         </div>
 
         <button
           onClick={onExport}
-          className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium bg-slate-100 hover:bg-slate-200 text-slate-800 transition"
+          className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium bg-slate-800 hover:bg-slate-900 text-white transition shadow-sm"
+          title="Export complete cleaned dataset to CSV without truncation"
         >
-          <Download className="w-3.5 h-3.5 text-slate-600" />
-          <span>Export Table to CSV</span>
+          <Download className="w-3.5 h-3.5 text-slate-300" />
+          <span>Export Full CSV ({totalRecords} rows)</span>
         </button>
       </div>
+
+      {totalRecords > records.length && (
+        <div className="mb-3 px-3 py-2 rounded-lg bg-sky-50 border border-sky-200 text-sky-800 text-xs flex items-center gap-2">
+          <Info className="w-4 h-4 text-sky-600 flex-shrink-0" />
+          <span>
+            Table preview shows the first {records.length} records for UI performance. <strong>Export Full CSV</strong> will download all <strong>{totalRecords}</strong> filtered records.
+          </span>
+        </div>
+      )}
 
       <div className="overflow-x-auto rounded-lg border border-slate-200">
         <table className="w-full text-left border-collapse text-xs">
@@ -164,7 +175,7 @@ export const DataTable: React.FC<DataTableProps> = ({ records, onExport }) => {
       <div className="flex items-center justify-between mt-3 text-xs text-slate-500">
         <div>
           Showing {(page - 1) * pageSize + 1} to{' '}
-          {Math.min(page * pageSize, sorted.length)} of {sorted.length} entries
+          {Math.min(page * pageSize, sorted.length)} of {sorted.length} entries previewed
         </div>
         <div className="flex items-center gap-1">
           <button

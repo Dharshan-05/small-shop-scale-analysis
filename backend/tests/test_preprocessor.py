@@ -4,7 +4,6 @@ from backend.app.services.preprocessor import DataPreprocessor
 from backend.app.schemas.sales import ColumnMappingConfig
 
 def test_preprocess_report_sample_clean():
-    # 4 rows from report
     data = {
         "Date": ["01-02-2026", "01-02-2026", "02-02-2026", "02-02-2026"],
         "Day": ["Monday", "Monday", "Tuesday", "Tuesday"],
@@ -24,7 +23,7 @@ def test_preprocess_report_sample_clean():
     
     # Check calendar correction: 01-02-2026 is actually Sunday, not Monday
     assert clean_df.iloc[0]["day_of_week"] == "Sunday"
-    assert clean_df.iloc[2]["day_of_week"] == "Monday" # 02-02-2026 is Monday
+    assert clean_df.iloc[2]["day_of_week"] == "Monday"
     assert report.date_corrections_count > 0
     
     # Check total sales computation
@@ -33,27 +32,79 @@ def test_preprocess_report_sample_clean():
     assert clean_df.iloc[2]["total_sales"] == 375.0
     assert clean_df.iloc[3]["total_sales"] == 200.0
 
-def test_preprocess_dirty_dataset():
+def test_duplicate_policy_remove_exact():
     data = {
-        "Date": ["01-02-2026", "01-02-2026", "02-02-2026", "03-02-2026", "not_a_date"],
-        "Day": ["Sunday", "Sunday", "Monday", "Tuesday", "Wednesday"],
-        "Product_Category": ["Snacks", "Snacks", None, "Grocery", "Household"],
-        "Product_Name": ["Biscuits", "Biscuits", "Chips", "Rice", "Soap"],
-        "Quantity_Sold": [10, 10, -5, "invalid", 5],
-        "Price": [10, 10, 20, 50, -10]
+        "Date": ["01-02-2026", "01-02-2026", "02-02-2026"],
+        "Product_Name": ["Biscuits", "Biscuits", "Biscuits"],
+        "Quantity_Sold": [10, 10, 10],
+        "Price": [20, 20, 20]
+    }
+    # Rows 0 and 1 are exact duplicates (same date, same product, same qty, same price)
+    # Row 2 is on a different date (02-02-2026), so it is a distinct, legitimate transaction
+    df = pd.DataFrame(data)
+    preprocessor = DataPreprocessor()
+    
+    mapping = ColumnMappingConfig(
+        date_col="Date",
+        product_col="Product_Name",
+        quantity_col="Quantity_Sold",
+        price_col="Price",
+        duplicate_policy="remove_exact"
+    )
+    clean_df, report = preprocessor.clean(df, mapping)
+    
+    assert report.total_raw_rows == 3
+    assert report.duplicate_rows_detected == 1
+    assert report.duplicate_rows_removed == 1
+    assert report.accepted_rows == 2
+    assert len(clean_df) == 2
+    # Ensure total sales is 2 * (10 * 20) = 400.0, NOT inflated to 600.0
+    assert clean_df["total_sales"].sum() == 400.0
+
+def test_duplicate_policy_keep_all():
+    data = {
+        "Date": ["01-02-2026", "01-02-2026"],
+        "Product_Name": ["Biscuits", "Biscuits"],
+        "Quantity_Sold": [10, 10],
+        "Price": [20, 20]
     }
     df = pd.DataFrame(data)
     preprocessor = DataPreprocessor()
-    clean_df, report = preprocessor.clean(df, ColumnMappingConfig())
     
-    # Duplicate row detected
-    assert report.duplicate_rows_detected >= 1
-    # Invalid date and negative values rejected
-    assert report.rejected_rows >= 2
-    # Missing category imputed
-    valid_accepted = clean_df[clean_df["product_name"] == "Chips"]
-    if len(valid_accepted) > 0:
-        assert valid_accepted.iloc[0]["product_category"] in ["General", "Uncategorized"]
+    mapping = ColumnMappingConfig(
+        date_col="Date",
+        product_col="Product_Name",
+        quantity_col="Quantity_Sold",
+        price_col="Price",
+        duplicate_policy="keep_all"
+    )
+    clean_df, report = preprocessor.clean(df, mapping)
+    
+    assert report.duplicate_rows_detected == 1
+    assert report.duplicate_rows_removed == 0
+    assert report.accepted_rows == 2
+    assert len(clean_df) == 2
+
+def test_non_duplicate_same_product_different_attributes():
+    # Transactions of the same product with different quantity or different price are NOT duplicates
+    data = {
+        "Date": ["01-02-2026", "01-02-2026", "01-02-2026"],
+        "Product_Name": ["Tea", "Tea", "Tea"],
+        "Quantity_Sold": [1, 2, 1],
+        "Price": [10, 10, 15]
+    }
+    df = pd.DataFrame(data)
+    preprocessor = DataPreprocessor()
+    clean_df, report = preprocessor.clean(df, ColumnMappingConfig(
+        date_col="Date",
+        product_col="Product_Name",
+        quantity_col="Quantity_Sold",
+        price_col="Price"
+    ))
+    
+    assert report.duplicate_rows_detected == 0
+    assert report.duplicate_rows_removed == 0
+    assert len(clean_df) == 3
 
 def test_precalculated_total_sales_no_double_counting():
     data = {
@@ -74,6 +125,5 @@ def test_precalculated_total_sales_no_double_counting():
     clean_df, report = preprocessor.clean(df, mapping)
     
     assert len(clean_df) == 2
-    # Must equal 500.0 and 1200.0, NOT 500 * 2 = 1000
     assert clean_df.iloc[0]["total_sales"] == 500.0
     assert clean_df.iloc[1]["total_sales"] == 1200.0

@@ -46,7 +46,8 @@ class DataPreprocessor:
             product_col=prod_col if prod_col in df.columns else None,
             quantity_col=qty_col if qty_col in df.columns else None,
             price_col=price_col if price_col in df.columns else None,
-            total_sales_col=total_col if total_col in df.columns else None
+            total_sales_col=total_col if total_col in df.columns else None,
+            duplicate_policy="remove_exact"
         )
 
     def clean(self, raw_df: pd.DataFrame, mapping: Optional[ColumnMappingConfig] = None) -> Tuple[pd.DataFrame, DataQualityReport]:
@@ -60,24 +61,49 @@ class DataPreprocessor:
         if mapping is None:
             mapping = self.auto_detect_mapping(df)
 
+        report.duplicate_policy = mapping.duplicate_policy
+
         issues: List[DataQualityIssue] = []
         missing_counts: Dict[str, int] = {}
 
-        # 1. Check duplicate rows
-        duplicates_mask = df.duplicated()
-        dup_count = int(duplicates_mask.sum())
+        # 1. Duplicate records detection & policy enforcement
+        dup_mask = df.duplicated(keep="first")
+        dup_count = int(dup_mask.sum())
         report.duplicate_rows_detected = dup_count
+
         if dup_count > 0:
-            report.warnings.append(f"Detected {dup_count} duplicate row(s) in source dataset.")
-            for idx in df[duplicates_mask].index[:10]: # report up to 10 instances
-                issues.append(DataQualityIssue(
-                    row_index=int(idx),
-                    column="ALL",
-                    issue_type="duplicate_row",
-                    original_value="Duplicate Row Record",
-                    action_taken="flagged",
-                    severity="warning"
-                ))
+            if mapping.duplicate_policy == "remove_exact":
+                report.duplicate_rows_removed = dup_count
+                report.warnings.append(
+                    f"Removed {dup_count} exact duplicate row(s) to prevent double-counting in sales totals."
+                )
+                for idx in df[dup_mask].index[:10]:
+                    issues.append(DataQualityIssue(
+                        row_index=int(idx),
+                        column="ALL",
+                        issue_type="exact_duplicate_row",
+                        original_value="Duplicate Row Record",
+                        action_taken="removed from analytics to prevent inflation",
+                        severity="warning",
+                        details="Identical transaction record removed per 'remove_exact' policy."
+                    ))
+                # Remove exact duplicates from analysis DataFrame
+                df = df[~dup_mask].copy()
+            else:
+                report.duplicate_rows_removed = 0
+                report.warnings.append(
+                    f"Detected {dup_count} duplicate row(s); preserved per 'keep_all' duplicate policy."
+                )
+                for idx in df[dup_mask].index[:10]:
+                    issues.append(DataQualityIssue(
+                        row_index=int(idx),
+                        column="ALL",
+                        issue_type="duplicate_row_preserved",
+                        original_value="Duplicate Row Record",
+                        action_taken="preserved",
+                        severity="warning",
+                        details="Duplicate record retained per 'keep_all' duplicate policy."
+                    ))
 
         # 2. Date parsing
         date_col = mapping.date_col
@@ -111,7 +137,6 @@ class DataPreprocessor:
 
         # Parse date with multiple format handling
         parsed_dates = pd.to_datetime(df[date_col], errors="coerce", dayfirst=True)
-        # For values that failed with dayfirst=True, try without dayfirst
         if parsed_dates.isna().sum() > null_dates.sum():
             failed_mask = parsed_dates.isna() & (~null_dates)
             fallback_parsed = pd.to_datetime(df.loc[failed_mask, date_col], errors="coerce")
@@ -159,7 +184,6 @@ class DataPreprocessor:
         # 4. Product Name and Category handling
         if mapping.product_col and mapping.product_col in df.columns:
             df["product_name"] = df[mapping.product_col].fillna("Unknown Item").astype(str).str.strip()
-            # check missing
             null_prod = df[mapping.product_col].isna() | (df[mapping.product_col].astype(str).str.strip() == "")
             if null_prod.sum() > 0:
                 missing_counts["product_name"] = int(null_prod.sum())
@@ -193,7 +217,6 @@ class DataPreprocessor:
             df["product_category"] = "General"
 
         # 5. Quantity and Price / Total Sales numeric processing
-        # Quantity
         if mapping.quantity_col and mapping.quantity_col in df.columns:
             raw_qty = pd.to_numeric(df[mapping.quantity_col], errors="coerce")
             null_qty = raw_qty.isna()
@@ -220,10 +243,8 @@ class DataPreprocessor:
                 ))
             df["quantity_sold"] = raw_qty
         else:
-            # Default to 1 unit if total sales is present
             df["quantity_sold"] = 1.0
 
-        # Price
         if mapping.price_col and mapping.price_col in df.columns:
             raw_price = pd.to_numeric(df[mapping.price_col], errors="coerce")
             neg_price = raw_price < 0
@@ -243,7 +264,6 @@ class DataPreprocessor:
         else:
             df["unit_price"] = None
 
-        # Total Sales: Check precalculated or calculate from Quantity * Price
         has_precalc_total = False
         if mapping.total_sales_col and mapping.total_sales_col in df.columns:
             raw_total = pd.to_numeric(df[mapping.total_sales_col], errors="coerce")
@@ -262,11 +282,9 @@ class DataPreprocessor:
                     ))
 
         if not has_precalc_total:
-            # Calculate Total Sales = Quantity Sold * Unit Price
             if "unit_price" in df.columns and df["unit_price"].notna().any():
                 df["total_sales"] = df["quantity_sold"] * df["unit_price"]
             else:
-                # If neither price nor total sales exists, quantity is total units
                 df["total_sales"] = df["quantity_sold"]
 
         # 6. Filter valid rows
